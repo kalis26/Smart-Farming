@@ -1,0 +1,60 @@
+@startuml
+class SmartFarmingSystem
+
+abstract class Zone
+class ZoneCulture
+class ZoneElevage
+class ZoneAquacole
+
+class Culture
+class Animal
+class Bassin
+
+abstract class Capteur
+abstract class CapteurNumerique
+class CapteurTemperature
+class CapteurHumidite
+class CapteurPH
+class CapteurPluviometrie
+class CapteurPoids
+class CapteurGPS
+
+class Releve
+class PositionGPS
+class Alerte
+class RapportProduction
+
+enum StatutCapteur
+enum StatutZone
+enum StatutAlerte
+enum NiveauGravite
+enum UniteMesure
+enum EtatSante
+enum TypeCulture
+enum EspeceAnimale
+enum EspeceAquacole
+
+SmartFarmingSystem "1" o-- "*" Zone
+SmartFarmingSystem "1" o-- "*" RapportProduction
+Zone <|-- ZoneCulture
+Zone <|-- ZoneElevage
+Zone <|-- ZoneAquacole
+ZoneCulture "1" o-- "*" Culture
+ZoneElevage "1" o-- "*" Animal
+ZoneAquacole "1" o-- "*" Bassin
+Zone "1" o-- "*" Capteur
+Zone "1" o-- "*" Releve
+Zone "1" o-- "*" Alerte
+Capteur <|-- CapteurNumerique
+Capteur <|-- CapteurGPS
+CapteurNumerique <|-- CapteurTemperature
+CapteurNumerique <|-- CapteurHumidite
+CapteurNumerique <|-- CapteurPH
+CapteurNumerique <|-- CapteurPluviometrie
+CapteurNumerique <|-- CapteurPoids
+Capteur "1" --> "*" Releve : produit
+Releve "1" --> "0..1" PositionGPS
+Alerte "*" --> "1" Releve : declenchee par
+Alerte "*" --> "1" Zone
+RapportProduction "*" --> "1" Zone
+@enduml
