@@ -35,6 +35,8 @@ enum EspeceAnimale
 enum EspeceAquacole
 
 SmartFarmingSystem "1" o-- "*" Zone
+SmartFarmingSystem "1" o-- "*" Releve
+SmartFarmingSystem "1" o-- "*" Alerte
 SmartFarmingSystem "1" o-- "*" RapportProduction
 Zone <|-- ZoneCulture
 Zone <|-- ZoneElevage
@@ -43,8 +45,8 @@ ZoneCulture "1" o-- "*" Culture
 ZoneElevage "1" o-- "*" Animal
 ZoneAquacole "1" o-- "*" Bassin
 Zone "1" o-- "*" Capteur
-Zone "1" o-- "*" Releve
-Zone "1" o-- "*" Alerte
+Zone "1" --> "*" Releve
+Zone "1" --> "*" Alerte
 Capteur <|-- CapteurNumerique
 Capteur <|-- CapteurGPS
 CapteurNumerique <|-- CapteurTemperature
