@@ -1,4 +1,6 @@
 package smartfarming.enums;
 
-public enum EspeceAquacole {
+public enum AquaSpecies {
+    POISSON,
+    CREVETTE
 }
