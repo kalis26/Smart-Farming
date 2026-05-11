@@ -41,6 +41,6 @@ public class Bassin {
                ", espece=" + espece +
                ", nbAnimaux=" + nombreAnimaux +
                ", aliment='" + typeAliment + "'" +
-               ", qté/repas=" + quantiteParRepas + " kg}";
+             ", qte/repas=" + quantiteParRepas + " kg}";
     }
 }

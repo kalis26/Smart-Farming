@@ -1,10 +1,8 @@
 package smartfarming.zones;
 
-import java.util.List;
-
-import smartfarming.entites.Animal;
-
 import java.util.ArrayList;
+import java.util.List;
+import smartfarming.entites.Animal;
 
 public class ZoneElevage extends Zone {
 
@@ -34,12 +32,12 @@ public class ZoneElevage extends Zone {
     public void ajouterAnimal(Animal a) {
         animaux.add(a);
         System.out.println("Animal #" + a.getId() + " (" + a.getEspece() +
-                           ") ajouté à la zone " + getNom());
+                           ") ajoute a la zone " + getNom());
     }
 
     public void supprimerAnimal(Animal a) {
         animaux.remove(a);
-        System.out.println("Animal #" + a.getId() + " retiré de la zone " + getNom());
+        System.out.println("Animal #" + a.getId() + " retire de la zone " + getNom());
     }
 
     public void definirProgrammeAlimentation(String typeAliment, double quantiteKg) {
@@ -52,13 +50,13 @@ public class ZoneElevage extends Zone {
     public void enregistrerProduction(double laitLitres, double oeufs) {
         this.rendementLaitier = laitLitres;
         this.productionOeufs  = oeufs;
-        System.out.println("Zone [" + getCode() + "] - Production enregistrée : " +
+        System.out.println("Zone [" + getCode() + "] - Production enregistree : " +
                            laitLitres + " L lait, " + oeufs + " oeufs");
     }
 
     @Override
     public void afficherResume() {
-        System.out.println("--- Zone Élevage : " + getNom() +
+        System.out.println("--- Zone Elevage : " + getNom() +
                            " [" + getCode() + "] | Statut : " + getStatus() +
                            " | Animaux : " + animaux.size() +
                            " | Aliment : " + typeAliment +

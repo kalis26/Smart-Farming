@@ -19,6 +19,22 @@ public abstract class Capteur {
         this.zone = zone;
     }
 
+    public void activer() {
+        this.statut = StatutCapteur.Actif;
+    }
+
+    public void suspendre() {
+        this.statut = StatutCapteur.Suspendu;
+    }
+
+    public void signalerDefaillance() {
+        this.statut = StatutCapteur.Defaillant;
+    }
+
+    public boolean estActif() {
+        return this.statut == StatutCapteur.Actif;
+    }
+
     public String getId() {
         return id;
     }

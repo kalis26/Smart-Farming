@@ -1,6 +1,6 @@
 package smartfarming.enums;
 
-public enum CropType {
+public enum TypeCulture {
     // Céréales
     BLE,
     MAIS,

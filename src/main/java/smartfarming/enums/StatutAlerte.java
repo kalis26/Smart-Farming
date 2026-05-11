@@ -1,5 +1,5 @@
 package smartfarming.enums;
 
 public enum StatutAlerte {
-    Avertissement, Critique
+    Acquittee, Avertissement, Critique
 }

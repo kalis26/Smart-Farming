@@ -1,7 +1,6 @@
 package smartfarming.alertes;
 
 import java.time.LocalDateTime;
-import smartfarming.enums.NiveauGravite;
 import smartfarming.enums.StatutAlerte;
 import smartfarming.mesures.Releve;
 import smartfarming.zones.Zone;
@@ -9,7 +8,6 @@ import smartfarming.zones.Zone;
 public class Alerte {
     private String id;
     private LocalDateTime dateHeure;
-    private NiveauGravite gravite;
     private String message;
     private StatutAlerte statut;
     private Zone zone;
@@ -18,15 +16,29 @@ public class Alerte {
     public Alerte() {
     }
 
-    public Alerte(String id, LocalDateTime dateHeure, NiveauGravite gravite, String message,
+    public Alerte(String id, LocalDateTime dateHeure, String message,
         StatutAlerte statut, Zone zone, Releve releveDeclencheur) {
-            this.id = id;
-            this.dateHeure = dateHeure;
-            this.gravite = gravite;
-            this.message = message;
-            this.statut = statut;
-            this.zone = zone;
-            this.releveDeclencheur = releveDeclencheur;
+        this.id = id;
+        this.dateHeure = dateHeure;
+        this.message = message;
+        this.statut = statut;
+        this.zone = zone;
+        this.releveDeclencheur = releveDeclencheur;
+    }
+
+    public static Alerte creerAlerte(Zone zone, Releve releveDeclencheur, String message) {
+        Alerte alerte = new Alerte();
+        alerte.setId(java.util.UUID.randomUUID().toString());
+        alerte.setDateHeure(LocalDateTime.now());
+        alerte.setZone(zone);
+        alerte.setReleveDeclencheur(releveDeclencheur);
+        alerte.setMessage(message);
+        alerte.setStatut(StatutAlerte.Critique);
+        return alerte;
+    }
+
+    public void acquitter() {
+        this.statut = StatutAlerte.Acquittee;
     }
 
     public String getId() {
@@ -43,14 +55,6 @@ public class Alerte {
 
     public void setDateHeure(LocalDateTime dateHeure) {
         this.dateHeure = dateHeure;
-    }
-
-    public NiveauGravite getGravite() {
-        return gravite;
-    }
-
-    public void setGravite(NiveauGravite gravite) {
-        this.gravite = gravite;
     }
 
     public String getMessage() {

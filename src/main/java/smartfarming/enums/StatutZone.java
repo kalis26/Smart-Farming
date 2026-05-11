@@ -1,6 +1,6 @@
 package smartfarming.enums;
 
-public enum ZoneStatus {
+public enum StatutZone {
     ACTIVE,
     SUSPENDED
 }

@@ -1,7 +1,12 @@
 package smartfarming.capteurs;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+import smartfarming.alertes.Alerte;
 import smartfarming.enums.StatutCapteur;
 import smartfarming.enums.UniteMesure;
+import smartfarming.mesures.ReleveNumerique;
 import smartfarming.zones.Zone;
 
 public abstract class CapteurNumerique extends Capteur {
@@ -18,6 +23,30 @@ public abstract class CapteurNumerique extends Capteur {
         this.unite = unite;
         this.seuilMin = seuilMin;
         this.seuilMax = seuilMax;
+    }
+
+    public boolean estHorsSeuil(double valeur) {
+        return valeur < seuilMin || valeur > seuilMax;
+    }
+
+    public ReleveNumerique creerReleve(double valeur) {
+        if (!estActif()) {
+            throw new IllegalStateException("Capteur numerique inactif");
+        }
+        return new ReleveNumerique(UUID.randomUUID().toString(), LocalDateTime.now(), this, valeur, this.getUnite());
+    }
+
+    public Optional<Alerte> evaluerAlerte(ReleveNumerique releve) {
+        if (estHorsSeuil(releve.getValeur())) {
+            Alerte alerte = new Alerte();
+            alerte.setId(java.util.UUID.randomUUID().toString());
+            alerte.setDateHeure(java.time.LocalDateTime.now());
+            alerte.setZone(this.getZone());
+            alerte.setReleveDeclencheur(releve);
+            alerte.setMessage("Valeur hors seuil : " + releve.getValeur() + " " + getUnite());
+            return Optional.of(alerte);
+        }
+        return Optional.empty();
     }
 
     public UniteMesure getUnite() {

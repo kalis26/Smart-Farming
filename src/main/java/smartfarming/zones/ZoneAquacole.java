@@ -1,9 +1,8 @@
 package smartfarming.zones;
 
-import java.util.List;
-
-import smartfarming.entites.Bassin;
 import java.util.ArrayList;
+import java.util.List;
+import smartfarming.entites.Bassin;
 
 public class ZoneAquacole extends Zone {
 
@@ -18,15 +17,15 @@ public class ZoneAquacole extends Zone {
     public double       getPoidsRecolte() { return poidsRecolte; }
     public void ajouterBassin(Bassin b) {
         bassins.add(b);
-        System.out.println("Bassin #" + b.getId() + " ajouté à la zone " + getNom());
+        System.out.println("Bassin #" + b.getId() + " ajoute a la zone " + getNom());
     }
     public void supprimerBassin(Bassin b) {
         bassins.remove(b);
-        System.out.println("Bassin #" + b.getId() + " retiré de la zone " + getNom());
+        System.out.println("Bassin #" + b.getId() + " retire de la zone " + getNom());
     }
     public void enregistrerProduction(double poidsKg) {
         this.poidsRecolte = poidsKg;
-        System.out.println("Zone [" + getCode() + "] - Récolte enregistrée : " +
+        System.out.println("Zone [" + getCode() + "] - Recolte enregistree : " +
                            poidsKg + " kg");
     }
     public int getNombreTotalAnimaux() {
@@ -43,7 +42,7 @@ public class ZoneAquacole extends Zone {
                            " [" + getCode() + "] | Statut : " + getStatus() +
                            " | Bassins : " + bassins.size() +
                            " | Total animaux : " + getNombreTotalAnimaux() +
-                           " | Récolte : " + poidsRecolte + " kg ---");
+                           " | Recolte : " + poidsRecolte + " kg ---");
     }
 }
 

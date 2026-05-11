@@ -1,10 +1,8 @@
 package smartfarming.zones;
 
-import java.util.List;
-
-import smartfarming.entites.Culture;
-
 import java.util.ArrayList;
+import java.util.List;
+import smartfarming.entites.Culture;
 
 public class ZoneCulture extends Zone {
 
@@ -22,24 +20,24 @@ public class ZoneCulture extends Zone {
 
     public void ajouterCulture(Culture c) {
         cultures.add(c);
-        System.out.println("Culture [" + c.getId() + "] ajoutée à la zone " + getNom());
+        System.out.println("Culture [" + c.getId() + "] ajoutee a la zone " + getNom());
     }
 
     public void supprimerCulture(Culture c) {
         cultures.remove(c);
-        System.out.println("Culture [" + c.getId() + "] retirée de la zone " + getNom());
+        System.out.println("Culture [" + c.getId() + "] retiree de la zone " + getNom());
     }
 
     public void enregistrerProduction(double rendementKgHa) {
         this.rendement = rendementKgHa;
-        System.out.println("Zone [" + getCode() + "] - Rendement enregistré : " +
+        System.out.println("Zone [" + getCode() + "] - Rendement enregistre : " +
                            rendementKgHa + " kg/ha");
     }
 
     public void genererRapportCultures() {
         System.out.println("=== Rapport Cultures - Zone : " + getNom() + " ===");
         if (cultures.isEmpty()) {
-            System.out.println("  Aucune culture enregistrée.");
+            System.out.println("  Aucune culture enregistree.");
         } else {
             for (Culture c : cultures) {
                 System.out.println("  " + c);

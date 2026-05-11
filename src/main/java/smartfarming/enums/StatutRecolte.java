@@ -1,6 +1,6 @@
 package smartfarming.enums;
 
-public enum RecolteStatus {
+public enum StatutRecolte {
     SEMIS,
     GERMINATION,
     CROISSANCE,

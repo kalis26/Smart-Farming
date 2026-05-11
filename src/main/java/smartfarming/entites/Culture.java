@@ -1,9 +1,9 @@
 package smartfarming.entites;
 
 
-import smartfarming.enums.TypeCulture;
-import smartfarming.enums.StatutRecolte;
 import java.time.LocalDate;
+import smartfarming.enums.StatutRecolte;
+import smartfarming.enums.TypeCulture;
 
 public class Culture {
 
@@ -53,7 +53,7 @@ public class Culture {
 
     public void mettreAJourStade(StatutRecolte stade) {
         this.stadeCroissance = stade;
-        System.out.println("Culture [" + id + "] (" + type + ") - Stade mis à jour : " + stade);
+        System.out.println("Culture [" + id + "] (" + type + ") - Stade mis a jour : " + stade);
     }
 
     @Override
@@ -61,8 +61,8 @@ public class Culture {
         return "Culture{id='" + id + "', type=" + type +
                ", stade=" + stadeCroissance +
                ", plantation=" + datePlantation +
-               ", récoltePrévue=" + dateRecoltePrevue +
+             ", recoltePrevue=" + dateRecoltePrevue +
                ", pH=[" + phMin + "-" + phMax + "]" +
-               ", humidité=[" + humiditeMin + "-" + humiditeMax + "]}";
+             ", humidite=[" + humiditeMin + "-" + humiditeMax + "]}";
     }
 }

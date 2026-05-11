@@ -1,6 +1,6 @@
 package smartfarming.enums;
 
-public enum HealthStatus {
+public enum EtatSante {
     SAIN,
     MALADE,
     QUARANTAINE
