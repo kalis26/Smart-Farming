@@ -1,14 +1,4 @@
 @startuml
-class SmartFarmingSystem {
-	- List<Zone> zones
-	- List<Releve> releves
-	- List<Alerte> alertes
-	- List<RapportProduction> rapports
-	+ ajouterZone(Zone zone)
-	+ enregistrerReleveNumerique(CapteurNumerique capteur, double valeur)
-	+ enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude)
-}
-
 abstract class Zone {
 	- String code
 	- String nom
@@ -18,54 +8,74 @@ abstract class Zone {
 	- double longitudeMin
 	- double longitudeMax
 	- List<Capteur> capteurs
-	- List<Capteur> capteursSuspendusParZone
 	- List<Releve> releves
 	- List<Alerte> alertes
 	+ contientPosition(PositionGPS position)
 	+ ajouterCapteur(Capteur capteur)
 }
+
 class ZoneCulture {
 	- List<Culture> cultures
 	- double rendement
 }
+
 class ZoneElevage {
 	- List<Animal> animaux
-	- String typeAliment
-	- double quantiteParRepas
+	- TypeElevage typeElevage
+	- ProgrammeAlimentation programmeAlimentation
 	- double rendementLaitier
 	- double productionOeufs
+	+ ajouterAnimal(Animal animal)
 }
+
 class ZoneAquacole {
 	- List<Bassin> bassins
+	- ProgrammeAlimentation programmeAlimentation
 	- double poidsRecolte
 }
 
-class Culture {
-	- String id
-	- TypeCulture type
-	- LocalDate datePlantation
-	- LocalDate dateRecoltePrevue
-	- StatutRecolte stadeCroissance
-	- double phMin
-	- double phMax
-	- double humiditeMin
-	- double humiditeMax
+class SmartFarmingSystem {
+	- List<Zone> zones
+	- List<Releve> releves
+	- List<Alerte> alertes
+	- List<RapportProduction> rapports
+	+ ajouterZone(Zone zone)
+	+ recevoirReleve(Releve releve)
+	+ simulerCycleReleves(Random random)
+	+ enregistrerReleveNumerique(CapteurNumerique capteur, double valeur)
+	+ enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude)
 }
-class Animal {
+
+abstract class Animal {
 	- int id
 	- EspeceAnimale espece
 	- int age
 	- double poids
 	- EtatSante etatSante
-	- List<String> historiqueSante
+	- List<EvenementSanitaire> historiqueSante
+	+ getTypeElevage()
 }
-class Bassin {
-	- int id
-	- EspeceAquacole espece
-	- int nombreAnimaux
+
+class Ruminant
+class Volaille
+
+class EvenementSanitaire {
+	- String id
+	- LocalDateTime dateHeure
+	- Animal animal
+	- String description
+	- EtatSante etatSante
+	- Double ancienPoids
+	- Double nouveauPoids
+}
+
+class ProgrammeAlimentation {
 	- String typeAliment
 	- double quantiteParRepas
 }
+
+class Culture
+class Bassin
 
 abstract class Capteur {
 	- String id
@@ -74,23 +84,40 @@ abstract class Capteur {
 	- Zone zone
 	+ reparer()
 }
+
 abstract class CapteurNumerique {
 	- UniteMesure unite
 	- double seuilMin
 	- double seuilMax
+	- List<ReleveNumerique> historique
+	+ envoyerReleve(Random random)
+	+ creerReleve(double valeur)
 }
-class CapteurTemperature
-class CapteurHumidite
-class CapteurPH
+
+abstract class CapteurEnvironnemental
+abstract class CapteurSol
+abstract class CapteurBiometrique {
+	- Animal animal
+}
+abstract class CapteurEau
+
+class CapteurTemperatureAir
+class CapteurHumiditeAir
 class CapteurPluviometrie
-class CapteurPoids
+class CapteurPHSol
+class CapteurHumiditeSol
+class CapteurAzote
+class CapteurTemperatureCorporelle
+class CapteurActivite
+class CapteurTemperatureEau
+class CapteurOxygeneDissous
+class CapteurPHEau
 class CapteurGPS {
 	- double latitude
 	- double longitude
+	- List<ReleveGPS> historiqueGPS
+	+ envoyerReleve(Random random)
 }
-class CapteurAzote
-class CapteurActivite
-class CapteurOxygeneDissous
 
 abstract class Releve {
 	- String id
@@ -98,17 +125,21 @@ abstract class Releve {
 	- Capteur capteur
 	- NiveauGravite niveauGravite
 }
-class ReleveGPS {
-	- PositionGPS position
-}
+
 class ReleveNumerique {
 	- Double valeur
 	- UniteMesure unite
 }
+
+class ReleveGPS {
+	- PositionGPS position
+}
+
 class PositionGPS {
 	- double latitude
 	- double longitude
 }
+
 class Alerte {
 	- String id
 	- LocalDateTime dateHeure
@@ -117,64 +148,67 @@ class Alerte {
 	- Zone zone
 	- Releve releveDeclencheur
 }
-class RapportProduction {
-	- String id
-	- LocalDateTime dateGeneration
-	- LocalDate debutPeriode
-	- LocalDate finPeriode
-	- Zone zone
-	- String contenu
-}
 
-enum StatutCapteur
+class RapportProduction
+
+enum TypeElevage
 enum StatutZone
+enum StatutCapteur
 enum StatutAlerte
 enum NiveauGravite
 enum UniteMesure
-enum EtatSante
-enum StatutRecolte
-enum TypeCulture
 enum EspeceAnimale
 enum EspeceAquacole
+enum EtatSante
 
+Zone <|-- ZoneCulture
+Zone <|-- ZoneElevage
+Zone <|-- ZoneAquacole
 SmartFarmingSystem "1" o-- "*" Zone
 SmartFarmingSystem "1" o-- "*" Releve
 SmartFarmingSystem "1" o-- "*" Alerte
 SmartFarmingSystem "1" o-- "*" RapportProduction
-Zone <|-- ZoneCulture
-Zone <|-- ZoneElevage
-Zone <|-- ZoneAquacole
+
 ZoneCulture "1" o-- "*" Culture
 ZoneElevage "1" o-- "*" Animal
+ZoneElevage "1" --> "1" TypeElevage
+ZoneElevage "1" --> "1" ProgrammeAlimentation
 ZoneAquacole "1" o-- "*" Bassin
+ZoneAquacole "1" --> "1" ProgrammeAlimentation
 Zone "1" o-- "*" Capteur
-Capteur <|-- CapteurNumerique
-Capteur <|-- CapteurGPS
-CapteurNumerique <|-- CapteurTemperature
-CapteurNumerique <|-- CapteurHumidite
-CapteurNumerique <|-- CapteurPH
-CapteurNumerique <|-- CapteurPluviometrie
-CapteurNumerique <|-- CapteurPoids
-CapteurNumerique <|-- CapteurAzote
-CapteurNumerique <|-- CapteurActivite
-CapteurNumerique <|-- CapteurOxygeneDissous
-Capteur "1" --> "*" Releve : produit
-Releve <|-- ReleveGPS
-Releve <|-- ReleveNumerique
-ReleveGPS "1" --> "1" PositionGPS
-ReleveNumerique "1" --> "1" UniteMesure
-Alerte "*" --> "1" Releve : declenchee par
-Alerte "*" --> "1" Zone
-RapportProduction "*" --> "1" Zone
-Capteur "1" --> "0..1" Zone
+Zone "1" o-- "*" Releve
+Zone "1" o-- "*" Alerte
+
+Animal <|-- Ruminant
+Animal <|-- Volaille
+Animal "1" o-- "*" EvenementSanitaire
 Animal "*" --> "1" EspeceAnimale
 Animal "*" --> "1" EtatSante
-Culture "*" --> "1" TypeCulture
-Culture "*" --> "1" StatutRecolte
-Bassin "*" --> "1" EspeceAquacole
+
+Capteur <|-- CapteurNumerique
+Capteur <|-- CapteurGPS
+CapteurNumerique <|-- CapteurEnvironnemental
+CapteurNumerique <|-- CapteurSol
+CapteurNumerique <|-- CapteurBiometrique
+CapteurNumerique <|-- CapteurEau
+CapteurEnvironnemental <|-- CapteurTemperatureAir
+CapteurEnvironnemental <|-- CapteurHumiditeAir
+CapteurEnvironnemental <|-- CapteurPluviometrie
+CapteurSol <|-- CapteurPHSol
+CapteurSol <|-- CapteurHumiditeSol
+CapteurSol <|-- CapteurAzote
+CapteurBiometrique <|-- CapteurTemperatureCorporelle
+CapteurBiometrique <|-- CapteurActivite
+CapteurEau <|-- CapteurTemperatureEau
+CapteurEau <|-- CapteurOxygeneDissous
+CapteurEau <|-- CapteurPHEau
+
+Releve <|-- ReleveNumerique
+Releve <|-- ReleveGPS
+ReleveGPS "1" --> "1" PositionGPS
+Releve "*" --> "1" NiveauGravite
+Alerte "*" --> "1" Releve : declenchee par
+Alerte "*" --> "1" StatutAlerte
 Capteur "*" --> "1" StatutCapteur
 CapteurNumerique "*" --> "1" UniteMesure
-Zone "*" --> "1" StatutZone
-Alerte "*" --> "1" StatutAlerte
-Releve "*" --> "1" NiveauGravite
 @enduml

@@ -7,12 +7,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import smartfarming.alertes.Alerte;
 import smartfarming.capteurs.Capteur;
 import smartfarming.capteurs.CapteurGPS;
 import smartfarming.capteurs.CapteurNumerique;
+import smartfarming.enums.NiveauGravite;
 import smartfarming.mesures.PositionGPS;
 import smartfarming.mesures.Releve;
 import smartfarming.mesures.ReleveGPS;
@@ -51,17 +53,8 @@ public class SmartFarmingSystem {
 
     public ReleveNumerique enregistrerReleveNumerique(CapteurNumerique capteur, double valeur) {
         Objects.requireNonNull(capteur, "capteur");
-        if (!capteur.estActif()) {
-            throw new IllegalStateException("Capteur numerique inactif");
-        }
         ReleveNumerique releve = capteur.creerReleve(valeur);
-        releves.add(releve);
-        Zone zone = capteur.getZone();
-        if (zone != null) {
-            zone.ajouterReleve(releve);
-        }
-        Optional<Alerte> alerte = capteur.evaluerAlerte(releve);
-        alerte.ifPresent(this::enregistrerAlerte);
+        recevoirReleve(releve);
         return releve;
     }
 
@@ -74,16 +67,56 @@ public class SmartFarmingSystem {
         capteur.setLatitude(latitude);
         capteur.setLongitude(longitude);
         ReleveGPS releve = new ReleveGPS(UUID.randomUUID().toString(), LocalDateTime.now(), capteur, position);
+        recevoirReleve(releve);
+        return releve;
+    }
+
+    public void recevoirReleve(Releve releve) {
+        Objects.requireNonNull(releve, "releve");
         releves.add(releve);
-        Zone zone = capteur.getZone();
+        Capteur capteur = releve.getCapteur();
+        Zone zone = capteur == null ? null : capteur.getZone();
         if (zone != null) {
             zone.ajouterReleve(releve);
-            if (!zone.contientPosition(position)) {
-                String message = "Position GPS hors zone : " + latitude + ", " + longitude;
-                enregistrerAlerte(Alerte.creerAlerte(zone, releve, message));
+        }
+        if (releve instanceof ReleveNumerique && capteur instanceof CapteurNumerique) {
+            CapteurNumerique capteurNumerique = (CapteurNumerique) capteur;
+            ReleveNumerique releveNumerique = (ReleveNumerique) releve;
+            capteurNumerique.ajouterReleve(releveNumerique);
+            Optional<Alerte> alerte = capteurNumerique.evaluerAlerte(releveNumerique);
+            alerte.ifPresent(this::enregistrerAlerte);
+        } else if (releve instanceof ReleveGPS && capteur instanceof CapteurGPS) {
+            CapteurGPS capteurGPS = (CapteurGPS) capteur;
+            ReleveGPS releveGPS = (ReleveGPS) releve;
+            capteurGPS.ajouterReleve(releveGPS);
+            PositionGPS position = releveGPS.getPosition();
+            capteurGPS.setLatitude(position.getLatitude());
+            capteurGPS.setLongitude(position.getLongitude());
+            if (zone != null && !zone.contientPosition(position)) {
+                releve.setNiveauGravite(NiveauGravite.Critique);
+                String message = "Position GPS hors zone : " + position.getLatitude()
+                        + ", " + position.getLongitude();
+                enregistrerAlerte(Alerte.creerAlerte(zone, releve, message, NiveauGravite.Critique));
+            } else {
+                releve.setNiveauGravite(NiveauGravite.Normal);
             }
         }
-        return releve;
+    }
+
+    public void simulerCycleReleves(Random random) {
+        Objects.requireNonNull(random, "random");
+        for (Zone zone : zones) {
+            for (Capteur capteur : zone.getCapteurs()) {
+                if (!capteur.estActif()) {
+                    continue;
+                }
+                if (capteur instanceof CapteurNumerique) {
+                    recevoirReleve(((CapteurNumerique) capteur).envoyerReleve(random));
+                } else if (capteur instanceof CapteurGPS) {
+                    recevoirReleve(((CapteurGPS) capteur).envoyerReleve(random));
+                }
+            }
+        }
     }
 
     public List<Releve> historiqueReleves(Zone zone) {
@@ -148,10 +181,12 @@ public class SmartFarmingSystem {
             ZoneElevage zoneElevage = (ZoneElevage) zone;
             contenu.append(" | Lait: ").append(zoneElevage.getRendementLaitier()).append(" L")
                 .append(" | Oeufs: ").append(zoneElevage.getProductionOeufs())
+                .append(" | Aliment: ").append(zoneElevage.getProgrammeAlimentation())
                 .append(" | Animaux: ").append(zoneElevage.getAnimaux().size());
         } else if (zone instanceof ZoneAquacole) {
             ZoneAquacole zoneAquacole = (ZoneAquacole) zone;
             contenu.append(" | Recolte: ").append(zoneAquacole.getPoidsRecolte()).append(" kg")
+                .append(" | Aliment: ").append(zoneAquacole.getProgrammeAlimentation())
                 .append(" | Bassins: ").append(zoneAquacole.getBassins().size())
                 .append(" | Total animaux: ").append(zoneAquacole.getNombreTotalAnimaux());
         }
