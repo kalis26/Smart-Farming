@@ -4,7 +4,7 @@ import smartfarming.enums.StatutCapteur;
 import smartfarming.enums.UniteMesure;
 import smartfarming.zones.Zone;
 
-public class CapteurAzote extends CapteurNumerique {
+public class CapteurAzote extends CapteurSol {
 	public CapteurAzote() {
 	}
 

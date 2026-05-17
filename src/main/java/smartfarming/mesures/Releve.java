@@ -9,7 +9,7 @@ public abstract class Releve {
     private String id;
     private LocalDateTime dateHeure;
     private Capteur capteur;
-    private NiveauGravite gravite;
+    private NiveauGravite niveauGravite;
 
     public Releve() {
     }
@@ -42,5 +42,13 @@ public abstract class Releve {
 
     public void setCapteur(Capteur capteur) {
         this.capteur = capteur;
+    }
+
+    public NiveauGravite getNiveauGravite() {
+        return niveauGravite;
+    }
+
+    public void setNiveauGravite(NiveauGravite niveauGravite) {
+        this.niveauGravite = niveauGravite;
     }
 }

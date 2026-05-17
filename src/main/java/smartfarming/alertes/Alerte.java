@@ -1,6 +1,7 @@
 package smartfarming.alertes;
 
 import java.time.LocalDateTime;
+import smartfarming.enums.NiveauGravite;
 import smartfarming.enums.StatutAlerte;
 import smartfarming.mesures.Releve;
 import smartfarming.zones.Zone;
@@ -27,13 +28,19 @@ public class Alerte {
     }
 
     public static Alerte creerAlerte(Zone zone, Releve releveDeclencheur, String message) {
+        return creerAlerte(zone, releveDeclencheur, message, NiveauGravite.Critique);
+    }
+
+    public static Alerte creerAlerte(Zone zone, Releve releveDeclencheur, String message,
+            NiveauGravite niveauGravite) {
         Alerte alerte = new Alerte();
         alerte.setId(java.util.UUID.randomUUID().toString());
         alerte.setDateHeure(LocalDateTime.now());
         alerte.setZone(zone);
         alerte.setReleveDeclencheur(releveDeclencheur);
         alerte.setMessage(message);
-        alerte.setStatut(StatutAlerte.Critique);
+        alerte.setStatut(niveauGravite == NiveauGravite.Avertissement
+                ? StatutAlerte.Avertissement : StatutAlerte.Critique);
         return alerte;
     }
 

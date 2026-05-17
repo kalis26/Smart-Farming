@@ -4,7 +4,7 @@ import smartfarming.enums.StatutCapteur;
 import smartfarming.enums.UniteMesure;
 import smartfarming.zones.Zone;
 
-public class CapteurOxygeneDissous extends CapteurNumerique {
+public class CapteurOxygeneDissous extends CapteurEau {
 	public CapteurOxygeneDissous() {
 	}
 

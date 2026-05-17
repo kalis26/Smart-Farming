@@ -4,11 +4,11 @@ import smartfarming.enums.StatutCapteur;
 import smartfarming.enums.UniteMesure;
 import smartfarming.zones.Zone;
 
-public class CapteurPluviometrie extends CapteurEnvironnemental {
-    public CapteurPluviometrie() {
+public abstract class CapteurEau extends CapteurNumerique {
+    protected CapteurEau() {
     }
 
-    public CapteurPluviometrie(String id, String nom, StatutCapteur statut, Zone zone,
+    protected CapteurEau(String id, String nom, StatutCapteur statut, Zone zone,
             UniteMesure unite, double seuilMin, double seuilMax) {
         super(id, nom, statut, zone, unite, seuilMin, seuilMax);
     }
