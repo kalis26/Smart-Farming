@@ -1,5 +1,5 @@
 package smartfarming.enums;
 
 public enum StatutCapteur {
-    Actif, Défaillant, Suspendu
+    Actif, Defaillant, Suspendu
 }

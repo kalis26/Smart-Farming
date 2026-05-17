@@ -1,28 +1,130 @@
 @startuml
-class SmartFarmingSystem
+class SmartFarmingSystem {
+	- List<Zone> zones
+	- List<Releve> releves
+	- List<Alerte> alertes
+	- List<RapportProduction> rapports
+	+ ajouterZone(Zone zone)
+	+ enregistrerReleveNumerique(CapteurNumerique capteur, double valeur)
+	+ enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude)
+}
 
-abstract class Zone
-class ZoneCulture
-class ZoneElevage
-class ZoneAquacole
+abstract class Zone {
+	- String code
+	- String nom
+	- StatutZone status
+	- double latitudeMin
+	- double latitudeMax
+	- double longitudeMin
+	- double longitudeMax
+	- List<Capteur> capteurs
+	- List<Capteur> capteursSuspendusParZone
+	- List<Releve> releves
+	- List<Alerte> alertes
+	+ contientPosition(PositionGPS position)
+	+ ajouterCapteur(Capteur capteur)
+}
+class ZoneCulture {
+	- List<Culture> cultures
+	- double rendement
+}
+class ZoneElevage {
+	- List<Animal> animaux
+	- String typeAliment
+	- double quantiteParRepas
+	- double rendementLaitier
+	- double productionOeufs
+}
+class ZoneAquacole {
+	- List<Bassin> bassins
+	- double poidsRecolte
+}
 
-class Culture
-class Animal
-class Bassin
+class Culture {
+	- String id
+	- TypeCulture type
+	- LocalDate datePlantation
+	- LocalDate dateRecoltePrevue
+	- StatutRecolte stadeCroissance
+	- double phMin
+	- double phMax
+	- double humiditeMin
+	- double humiditeMax
+}
+class Animal {
+	- int id
+	- EspeceAnimale espece
+	- int age
+	- double poids
+	- EtatSante etatSante
+	- List<String> historiqueSante
+}
+class Bassin {
+	- int id
+	- EspeceAquacole espece
+	- int nombreAnimaux
+	- String typeAliment
+	- double quantiteParRepas
+}
 
-abstract class Capteur
-abstract class CapteurNumerique
+abstract class Capteur {
+	- String id
+	- String nom
+	- StatutCapteur statut
+	- Zone zone
+	+ reparer()
+}
+abstract class CapteurNumerique {
+	- UniteMesure unite
+	- double seuilMin
+	- double seuilMax
+}
 class CapteurTemperature
 class CapteurHumidite
 class CapteurPH
 class CapteurPluviometrie
 class CapteurPoids
-class CapteurGPS
+class CapteurGPS {
+	- double latitude
+	- double longitude
+}
+class CapteurAzote
+class CapteurActivite
+class CapteurOxygeneDissous
 
-class Releve
-class PositionGPS
-class Alerte
-class RapportProduction
+abstract class Releve {
+	- String id
+	- LocalDateTime dateHeure
+	- Capteur capteur
+	- NiveauGravite niveauGravite
+}
+class ReleveGPS {
+	- PositionGPS position
+}
+class ReleveNumerique {
+	- Double valeur
+	- UniteMesure unite
+}
+class PositionGPS {
+	- double latitude
+	- double longitude
+}
+class Alerte {
+	- String id
+	- LocalDateTime dateHeure
+	- String message
+	- StatutAlerte statut
+	- Zone zone
+	- Releve releveDeclencheur
+}
+class RapportProduction {
+	- String id
+	- LocalDateTime dateGeneration
+	- LocalDate debutPeriode
+	- LocalDate finPeriode
+	- Zone zone
+	- String contenu
+}
 
 enum StatutCapteur
 enum StatutZone
@@ -30,6 +132,7 @@ enum StatutAlerte
 enum NiveauGravite
 enum UniteMesure
 enum EtatSante
+enum StatutRecolte
 enum TypeCulture
 enum EspeceAnimale
 enum EspeceAquacole
@@ -45,8 +148,6 @@ ZoneCulture "1" o-- "*" Culture
 ZoneElevage "1" o-- "*" Animal
 ZoneAquacole "1" o-- "*" Bassin
 Zone "1" o-- "*" Capteur
-Zone "1" --> "*" Releve
-Zone "1" --> "*" Alerte
 Capteur <|-- CapteurNumerique
 Capteur <|-- CapteurGPS
 CapteurNumerique <|-- CapteurTemperature
@@ -54,9 +155,26 @@ CapteurNumerique <|-- CapteurHumidite
 CapteurNumerique <|-- CapteurPH
 CapteurNumerique <|-- CapteurPluviometrie
 CapteurNumerique <|-- CapteurPoids
+CapteurNumerique <|-- CapteurAzote
+CapteurNumerique <|-- CapteurActivite
+CapteurNumerique <|-- CapteurOxygeneDissous
 Capteur "1" --> "*" Releve : produit
-Releve "1" --> "0..1" PositionGPS
+Releve <|-- ReleveGPS
+Releve <|-- ReleveNumerique
+ReleveGPS "1" --> "1" PositionGPS
+ReleveNumerique "1" --> "1" UniteMesure
 Alerte "*" --> "1" Releve : declenchee par
 Alerte "*" --> "1" Zone
 RapportProduction "*" --> "1" Zone
+Capteur "1" --> "0..1" Zone
+Animal "*" --> "1" EspeceAnimale
+Animal "*" --> "1" EtatSante
+Culture "*" --> "1" TypeCulture
+Culture "*" --> "1" StatutRecolte
+Bassin "*" --> "1" EspeceAquacole
+Capteur "*" --> "1" StatutCapteur
+CapteurNumerique "*" --> "1" UniteMesure
+Zone "*" --> "1" StatutZone
+Alerte "*" --> "1" StatutAlerte
+Releve "*" --> "1" NiveauGravite
 @enduml
