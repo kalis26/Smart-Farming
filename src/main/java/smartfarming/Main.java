@@ -1,11 +1,13 @@
 package smartfarming;
 
 import java.time.LocalDate;
+import java.util.Random;
 import smartfarming.alertes.Alerte;
 import smartfarming.capteurs.CapteurActivite;
 import smartfarming.capteurs.CapteurAzote;
 import smartfarming.capteurs.CapteurGPS;
 import smartfarming.capteurs.CapteurHumidite;
+import smartfarming.capteurs.CapteurNumerique;
 import smartfarming.capteurs.CapteurOxygeneDissous;
 import smartfarming.capteurs.CapteurPH;
 import smartfarming.capteurs.CapteurPluviometrie;
@@ -29,10 +31,14 @@ import smartfarming.zones.ZoneElevage;
 public class Main {
 	public static void main(String[] args) {
 		SmartFarmingSystem system = new SmartFarmingSystem();
+		Random random = new Random(2026);
 
-		ZoneCulture zoneCulture = new ZoneCulture("ZC-01", "Zone Culture 1");
-		ZoneElevage zoneElevage = new ZoneElevage("ZE-01", "Zone Elevage 1");
-		ZoneAquacole zoneAquacole = new ZoneAquacole("ZA-01", "Zone Aquacole 1");
+		ZoneCulture zoneCulture = new ZoneCulture("ZC-01", "Zone Culture 1",
+				36.7300, 36.7400, 3.0000, 3.0200);
+		ZoneElevage zoneElevage = new ZoneElevage("ZE-01", "Zone Elevage 1",
+				36.7500, 36.7600, 3.0350, 3.0500);
+		ZoneAquacole zoneAquacole = new ZoneAquacole("ZA-01", "Zone Aquacole 1",
+				36.7200, 36.7280, 3.0250, 3.0400);
 		system.ajouterZone(zoneCulture);
 		system.ajouterZone(zoneElevage);
 		system.ajouterZone(zoneAquacole);
@@ -40,10 +46,10 @@ public class Main {
 		Culture culture = new Culture("C-01", TypeCulture.BLE,
 				LocalDate.now().minusDays(10), LocalDate.now().plusDays(60),
 				5.5, 7.0, 35.0, 70.0);
-		system.ajouterCulture(zoneCulture, culture);
+		zoneCulture.ajouterCulture(culture);
 
 		Animal animal = new Animal(1, EspeceAnimale.VACHE, 24, 320.0);
-		system.ajouterAnimal(zoneElevage, animal);
+		zoneElevage.ajouterAnimal(animal);
 		animal.mettreAJourSante(EtatSante.MALADE);
 		animal.enregistrerPoids(315.0);
 
@@ -61,11 +67,11 @@ public class Main {
 		CapteurAzote azote = new CapteurAzote("N-01", "Azote Sol",
 				StatutCapteur.Actif, null, UniteMesure.gKg, 0.5, 3.0);
 
-		system.ajouterCapteur(zoneCulture, tempAir);
-		system.ajouterCapteur(zoneCulture, humidite);
-		system.ajouterCapteur(zoneCulture, phSol);
-		system.ajouterCapteur(zoneCulture, pluie);
-		system.ajouterCapteur(zoneCulture, azote);
+		zoneCulture.ajouterCapteur(tempAir);
+		zoneCulture.ajouterCapteur(humidite);
+		zoneCulture.ajouterCapteur(phSol);
+		zoneCulture.ajouterCapteur(pluie);
+		zoneCulture.ajouterCapteur(azote);
 
 		CapteurActivite activite = new CapteurActivite("A-01", "Activite",
 				StatutCapteur.Actif, null, UniteMesure.stepmin, 10.0, 80.0);
@@ -74,9 +80,9 @@ public class Main {
 		CapteurGPS gps = new CapteurGPS("G-01", "Collier GPS",
 				StatutCapteur.Actif, null, 0.0, 0.0);
 
-		system.ajouterCapteur(zoneElevage, activite);
-		system.ajouterCapteur(zoneElevage, poids);
-		system.ajouterCapteur(zoneElevage, gps);
+		zoneElevage.ajouterCapteur(activite);
+		zoneElevage.ajouterCapteur(poids);
+		zoneElevage.ajouterCapteur(gps);
 
 		CapteurTemperature tempEau = new CapteurTemperature("T-02", "Temp Eau",
 				StatutCapteur.Actif, null, UniteMesure.Celsius, 12.0, 28.0);
@@ -85,23 +91,24 @@ public class Main {
 		CapteurPH phEau = new CapteurPH("PH-02", "pH Eau",
 				StatutCapteur.Actif, null, UniteMesure.pH, 6.5, 8.5);
 
-		system.ajouterCapteur(zoneAquacole, tempEau);
-		system.ajouterCapteur(zoneAquacole, oxygene);
-		system.ajouterCapteur(zoneAquacole, phEau);
+		zoneAquacole.ajouterCapteur(tempEau);
+		zoneAquacole.ajouterCapteur(oxygene);
+		zoneAquacole.ajouterCapteur(phEau);
 
-		system.enregistrerReleveNumerique(tempAir, 22.5);
-		system.enregistrerReleveNumerique(humidite, 60.0);
-		system.enregistrerReleveNumerique(phSol, 7.8);
-		system.enregistrerReleveNumerique(pluie, 12.0);
-		system.enregistrerReleveNumerique(azote, 4.0);
+		enregistrerLectureAuto(system, random, tempAir, false);
+		enregistrerLectureAuto(system, random, humidite, false);
+		enregistrerLectureAuto(system, random, phSol, true);
+		enregistrerLectureAuto(system, random, pluie, false);
+		enregistrerLectureAuto(system, random, azote, true);
 
-		system.enregistrerReleveNumerique(activite, 35.0);
-		system.enregistrerReleveNumerique(poids, 310.0);
-		system.enregistrerReleveGPS(gps, 36.7525, 3.0419);
+		enregistrerLectureAuto(system, random, activite, false);
+		enregistrerLectureAuto(system, random, poids, false);
+		enregistrerPositionAuto(system, random, gps, 36.7550, 3.0420, false);
+		enregistrerPositionAuto(system, random, gps, 36.7550, 3.0420, true);
 
-		system.enregistrerReleveNumerique(tempEau, 18.0);
-		system.enregistrerReleveNumerique(oxygene, 3.0);
-		system.enregistrerReleveNumerique(phEau, 7.2);
+		enregistrerLectureAuto(system, random, tempEau, false);
+		enregistrerLectureAuto(system, random, oxygene, true);
+		enregistrerLectureAuto(system, random, phEau, false);
 
 		System.out.println("Alertes actives: " + system.alertesActives().size());
 		if (!system.alertesActives().isEmpty()) {
@@ -110,13 +117,19 @@ public class Main {
 		}
 		System.out.println("Alertes actives apres acquittement: " + system.alertesActives().size());
 
+		humidite.signalerDefaillance();
+		System.out.println("Statut humidite avant suspension: " + humidite.getStatut());
 		zoneCulture.suspendre();
 		try {
-			system.enregistrerReleveNumerique(tempAir, 18.0);
+			enregistrerLectureAuto(system, random, tempAir, false);
 		} catch (IllegalStateException ex) {
 			System.out.println("Lecture refusee (capteur suspendu): " + ex.getMessage());
 		}
 		zoneCulture.reactiver();
+		System.out.println("Statut humidite apres reactivation zone: " + humidite.getStatut());
+		humidite.reparer();
+		System.out.println("Statut humidite apres maintenance: " + humidite.getStatut());
+		enregistrerLectureAuto(system, random, humidite, false);
 
 		RapportProduction rc = system.genererRapportProduction(zoneCulture,
 				LocalDate.now().minusDays(7), LocalDate.now());
@@ -128,5 +141,45 @@ public class Main {
 		System.out.println(rc.getContenu());
 		System.out.println(re.getContenu());
 		System.out.println(ra.getContenu());
+	}
+
+	private static void enregistrerLectureAuto(SmartFarmingSystem system, Random random,
+			CapteurNumerique capteur, boolean horsSeuil) {
+		double valeur = horsSeuil ? genererValeurHorsSeuil(random, capteur)
+				: genererValeurNormale(random, capteur);
+		system.enregistrerReleveNumerique(capteur, valeur);
+		System.out.println("Lecture automatique " + capteur.getNom() + " = "
+				+ arrondir(valeur) + " " + capteur.getUnite());
+	}
+
+	private static double genererValeurNormale(Random random, CapteurNumerique capteur) {
+		double amplitude = capteur.getSeuilMax() - capteur.getSeuilMin();
+		return capteur.getSeuilMin() + amplitude * (0.2 + random.nextDouble() * 0.6);
+	}
+
+	private static double genererValeurHorsSeuil(Random random, CapteurNumerique capteur) {
+		double amplitude = capteur.getSeuilMax() - capteur.getSeuilMin();
+		double marge = Math.max(amplitude * 0.1, 0.1);
+		if (random.nextBoolean()) {
+			return capteur.getSeuilMax() + marge;
+		}
+		return capteur.getSeuilMin() - marge;
+	}
+
+	private static void enregistrerPositionAuto(SmartFarmingSystem system, Random random,
+			CapteurGPS gps, double latitudeBase, double longitudeBase, boolean horsZone) {
+		double latitude = latitudeBase + (random.nextDouble() - 0.5) * 0.004;
+		double longitude = longitudeBase + (random.nextDouble() - 0.5) * 0.004;
+		if (horsZone) {
+			latitude = gps.getZone().getLatitudeMax() + 0.01;
+			longitude = gps.getZone().getLongitudeMax() + 0.01;
+		}
+		system.enregistrerReleveGPS(gps, latitude, longitude);
+		System.out.println("Position GPS automatique = " + arrondir(latitude)
+				+ ", " + arrondir(longitude));
+	}
+
+	private static double arrondir(double valeur) {
+		return Math.round(valeur * 100.0) / 100.0;
 	}
 }

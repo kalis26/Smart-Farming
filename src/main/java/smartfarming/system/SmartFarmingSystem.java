@@ -11,9 +11,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import smartfarming.alertes.Alerte;
 import smartfarming.capteurs.Capteur;
+import smartfarming.capteurs.CapteurGPS;
 import smartfarming.capteurs.CapteurNumerique;
-import smartfarming.entites.Animal;
-import smartfarming.entites.Culture;
 import smartfarming.mesures.PositionGPS;
 import smartfarming.mesures.Releve;
 import smartfarming.mesures.ReleveGPS;
@@ -50,24 +49,6 @@ public class SmartFarmingSystem {
         zones.add(zone);
     }
 
-    public void ajouterCapteur(Zone zone, Capteur capteur) {
-        Objects.requireNonNull(zone, "zone");
-        Objects.requireNonNull(capteur, "capteur");
-        zone.ajouterCapteur(capteur);
-    }
-
-    public void ajouterCulture(ZoneCulture zone, Culture culture) {
-        Objects.requireNonNull(zone, "zone");
-        Objects.requireNonNull(culture, "culture");
-        zone.ajouterCulture(culture);
-    }
-
-    public void ajouterAnimal(ZoneElevage zone, Animal animal) {
-        Objects.requireNonNull(zone, "zone");
-        Objects.requireNonNull(animal, "animal");
-        zone.ajouterAnimal(animal);
-    }
-
     public ReleveNumerique enregistrerReleveNumerique(CapteurNumerique capteur, double valeur) {
         Objects.requireNonNull(capteur, "capteur");
         if (!capteur.estActif()) {
@@ -84,17 +65,23 @@ public class SmartFarmingSystem {
         return releve;
     }
 
-    public ReleveGPS enregistrerReleveGPS(Capteur capteur, double latitude, double longitude) {
+    public ReleveGPS enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude) {
         Objects.requireNonNull(capteur, "capteur");
         if (!capteur.estActif()) {
             throw new IllegalStateException("Capteur GPS inactif");
         }
         PositionGPS position = new PositionGPS(latitude, longitude);
+        capteur.setLatitude(latitude);
+        capteur.setLongitude(longitude);
         ReleveGPS releve = new ReleveGPS(UUID.randomUUID().toString(), LocalDateTime.now(), capteur, position);
         releves.add(releve);
         Zone zone = capteur.getZone();
         if (zone != null) {
             zone.ajouterReleve(releve);
+            if (!zone.contientPosition(position)) {
+                String message = "Position GPS hors zone : " + latitude + ", " + longitude;
+                enregistrerAlerte(Alerte.creerAlerte(zone, releve, message));
+            }
         }
         return releve;
     }

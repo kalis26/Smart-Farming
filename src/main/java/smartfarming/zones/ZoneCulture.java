@@ -9,8 +9,9 @@ public class ZoneCulture extends Zone {
     private List<Culture> cultures;
     private double rendement;
 
-    public ZoneCulture(String code, String nom) {
-        super(code, nom);
+    public ZoneCulture(String code, String nom, double latitudeMin, double latitudeMax,
+            double longitudeMin, double longitudeMax) {
+        super(code, nom, latitudeMin, latitudeMax, longitudeMin, longitudeMax);
         this.cultures  = new ArrayList<>();
         this.rendement = 0.0;
     }

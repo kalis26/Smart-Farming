@@ -2,13 +2,14 @@ package smartfarming.mesures;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 import smartfarming.capteurs.Capteur;
+import smartfarming.enums.NiveauGravite;
 
 public abstract class Releve {
     private String id;
     private LocalDateTime dateHeure;
     private Capteur capteur;
+    private NiveauGravite gravite;
 
     public Releve() {
     }

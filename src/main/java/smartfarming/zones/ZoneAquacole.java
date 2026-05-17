@@ -8,8 +8,9 @@ public class ZoneAquacole extends Zone {
 
     private List<Bassin> bassins;
     private double poidsRecolte;   
-    public ZoneAquacole(String code, String nom) {
-        super(code, nom);
+    public ZoneAquacole(String code, String nom, double latitudeMin, double latitudeMax,
+            double longitudeMin, double longitudeMax) {
+        super(code, nom, latitudeMin, latitudeMax, longitudeMin, longitudeMax);
         this.bassins     = new ArrayList<>();
         this.poidsRecolte = 0.0;
     }

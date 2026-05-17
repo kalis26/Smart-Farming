@@ -31,6 +31,12 @@ public abstract class Capteur {
         this.statut = StatutCapteur.Defaillant;
     }
 
+    public void reparer() {
+        if (this.statut == StatutCapteur.Defaillant) {
+            this.statut = StatutCapteur.Actif;
+        }
+    }
+
     public boolean estActif() {
         return this.statut == StatutCapteur.Actif;
     }

@@ -38,13 +38,8 @@ public abstract class CapteurNumerique extends Capteur {
 
     public Optional<Alerte> evaluerAlerte(ReleveNumerique releve) {
         if (estHorsSeuil(releve.getValeur())) {
-            Alerte alerte = new Alerte();
-            alerte.setId(java.util.UUID.randomUUID().toString());
-            alerte.setDateHeure(java.time.LocalDateTime.now());
-            alerte.setZone(this.getZone());
-            alerte.setReleveDeclencheur(releve);
-            alerte.setMessage("Valeur hors seuil : " + releve.getValeur() + " " + getUnite());
-            return Optional.of(alerte);
+            String message = "Valeur hors seuil : " + releve.getValeur() + " " + getUnite();
+            return Optional.of(Alerte.creerAlerte(this.getZone(), releve, message));
         }
         return Optional.empty();
     }

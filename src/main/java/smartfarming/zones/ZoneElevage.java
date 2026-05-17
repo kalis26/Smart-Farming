@@ -14,8 +14,9 @@ public class ZoneElevage extends Zone {
     private double rendementLaitier;
     private double productionOeufs;
 
-    public ZoneElevage(String code, String nom) {
-        super(code, nom);
+    public ZoneElevage(String code, String nom, double latitudeMin, double latitudeMax,
+            double longitudeMin, double longitudeMax) {
+        super(code, nom, latitudeMin, latitudeMax, longitudeMin, longitudeMax);
         this.animaux          = new ArrayList<>();
         this.typeAliment      = "";
         this.quantiteParRepas = 0.0;
