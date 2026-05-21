@@ -40,25 +40,38 @@ public class SmartFarmingSystem {
 
     public SmartFarmingSystem(List<Zone> zones, List<Releve> releves, List<Alerte> alertes,
             List<RapportProduction> rapports) {
-        this.zones = (zones == null) ? new ArrayList<>() : zones;
+        this.zones = new ArrayList<>();
+        if (zones != null) {
+            for (Zone zone : zones) {
+                ajouterZone(zone);
+            }
+        }
         this.releves = (releves == null) ? new ArrayList<>() : releves;
         this.alertes = (alertes == null) ? new ArrayList<>() : alertes;
         this.rapports = (rapports == null) ? new ArrayList<>() : rapports;
     }
 
-    public void ajouterZone(Zone zone) {
+    public synchronized void ajouterZone(Zone zone) {
         Objects.requireNonNull(zone, "zone");
+        if (zone.getCode() == null || zone.getCode().isBlank()) {
+            throw new IllegalArgumentException("Le code de la zone est obligatoire.");
+        }
+        boolean codeExiste = zones.stream()
+                .anyMatch(zoneExistante -> zone.getCode().equals(zoneExistante.getCode()));
+        if (codeExiste) {
+            throw new IllegalArgumentException("Une zone avec le code " + zone.getCode() + " existe deja.");
+        }
         zones.add(zone);
     }
 
-    public ReleveNumerique enregistrerReleveNumerique(CapteurNumerique capteur, double valeur) {
+    public synchronized ReleveNumerique enregistrerReleveNumerique(CapteurNumerique capteur, double valeur) {
         Objects.requireNonNull(capteur, "capteur");
         ReleveNumerique releve = capteur.creerReleve(valeur);
         recevoirReleve(releve);
         return releve;
     }
 
-    public ReleveGPS enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude) {
+    public synchronized ReleveGPS enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude) {
         Objects.requireNonNull(capteur, "capteur");
         if (!capteur.estActif()) {
             throw new IllegalStateException("Capteur GPS inactif");
@@ -71,7 +84,7 @@ public class SmartFarmingSystem {
         return releve;
     }
 
-    public void recevoirReleve(Releve releve) {
+    public synchronized void recevoirReleve(Releve releve) {
         Objects.requireNonNull(releve, "releve");
         releves.add(releve);
         Capteur capteur = releve.getCapteur();
@@ -103,8 +116,10 @@ public class SmartFarmingSystem {
         }
     }
 
-    public void simulerCycleReleves(Random random) {
+    public synchronized ResultatSimulation simulerCycleReleves(Random random) {
         Objects.requireNonNull(random, "random");
+        int relevesAvant = releves.size();
+        int alertesAvant = alertes.size();
         for (Zone zone : zones) {
             for (Capteur capteur : zone.getCapteurs()) {
                 if (!capteur.estActif()) {
@@ -117,23 +132,25 @@ public class SmartFarmingSystem {
                 }
             }
         }
+        return new ResultatSimulation(LocalDateTime.now(), releves.size() - relevesAvant,
+                alertes.size() - alertesAvant);
     }
 
-    public List<Releve> historiqueReleves(Zone zone) {
+    public synchronized List<Releve> historiqueReleves(Zone zone) {
         Objects.requireNonNull(zone, "zone");
         return releves.stream()
                 .filter(releve -> releve.getCapteur() != null && zone.equals(releve.getCapteur().getZone()))
                 .collect(Collectors.toList());
     }
 
-    public List<Releve> historiqueReleves(Capteur capteur) {
+    public synchronized List<Releve> historiqueReleves(Capteur capteur) {
         Objects.requireNonNull(capteur, "capteur");
         return releves.stream()
                 .filter(releve -> capteur.equals(releve.getCapteur()))
                 .collect(Collectors.toList());
     }
 
-    public List<Releve> historiqueReleves(LocalDateTime debut, LocalDateTime fin) {
+    public synchronized List<Releve> historiqueReleves(LocalDateTime debut, LocalDateTime fin) {
         Objects.requireNonNull(debut, "debut");
         Objects.requireNonNull(fin, "fin");
         return releves.stream()
@@ -142,14 +159,14 @@ public class SmartFarmingSystem {
                 .collect(Collectors.toList());
     }
 
-    public List<Alerte> alertesActives() {
+    public synchronized List<Alerte> alertesActives() {
         return alertes.stream()
                 .filter(alerte -> alerte.getStatut() != smartfarming.enums.StatutAlerte.Acquittee)
                 .sorted(Comparator.comparing(Alerte::getDateHeure).reversed())
                 .collect(Collectors.toList());
     }
 
-    public List<Alerte> alertesFiltrees(Zone zone, LocalDateTime debut, LocalDateTime fin) {
+    public synchronized List<Alerte> alertesFiltrees(Zone zone, LocalDateTime debut, LocalDateTime fin) {
         return alertes.stream()
                 .filter(alerte -> zone == null || zone.equals(alerte.getZone()))
                 .filter(alerte -> debut == null || (alerte.getDateHeure() != null
@@ -160,7 +177,7 @@ public class SmartFarmingSystem {
                 .collect(Collectors.toList());
     }
 
-    public RapportProduction genererRapportProduction(Zone zone, LocalDate debut, LocalDate fin) {
+    public synchronized RapportProduction genererRapportProduction(Zone zone, LocalDate debut, LocalDate fin) {
         Objects.requireNonNull(zone, "zone");
         Objects.requireNonNull(debut, "debut");
         Objects.requireNonNull(fin, "fin");
@@ -200,7 +217,7 @@ public class SmartFarmingSystem {
         return rapport;
     }
 
-    private void enregistrerAlerte(Alerte alerte) {
+    private synchronized void enregistrerAlerte(Alerte alerte) {
         alertes.add(alerte);
         Zone zone = alerte.getZone();
         if (zone != null) {
@@ -208,7 +225,7 @@ public class SmartFarmingSystem {
         }
     }
 
-    public boolean supprimerAlerte(Alerte alerte) {
+    public synchronized boolean supprimerAlerte(Alerte alerte) {
         if (alerte == null) {
             return false;
         }
@@ -220,35 +237,40 @@ public class SmartFarmingSystem {
         return removed;
     }
 
-    public List<Zone> getZones() {
-        return zones;
+    public synchronized List<Zone> getZones() {
+        return new ArrayList<>(zones);
     }
 
-    public void setZones(List<Zone> zones) {
-        this.zones = zones;
+    public synchronized void setZones(List<Zone> zones) {
+        this.zones = new ArrayList<>();
+        if (zones != null) {
+            for (Zone zone : zones) {
+                ajouterZone(zone);
+            }
+        }
     }
 
-    public List<Releve> getReleves() {
-        return releves;
+    public synchronized List<Releve> getReleves() {
+        return new ArrayList<>(releves);
     }
 
-    public void setReleves(List<Releve> releves) {
+    public synchronized void setReleves(List<Releve> releves) {
         this.releves = releves;
     }
 
-    public List<Alerte> getAlertes() {
-        return alertes;
+    public synchronized List<Alerte> getAlertes() {
+        return new ArrayList<>(alertes);
     }
 
-    public void setAlertes(List<Alerte> alertes) {
+    public synchronized void setAlertes(List<Alerte> alertes) {
         this.alertes = alertes;
     }
 
-    public List<RapportProduction> getRapports() {
-        return rapports;
+    public synchronized List<RapportProduction> getRapports() {
+        return new ArrayList<>(rapports);
     }
 
-    public void setRapports(List<RapportProduction> rapports) {
+    public synchronized void setRapports(List<RapportProduction> rapports) {
         this.rapports = rapports;
     }
 }

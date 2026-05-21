@@ -46,6 +46,12 @@ class SmartFarmingSystem {
 	+ enregistrerReleveGPS(CapteurGPS capteur, double latitude, double longitude)
 }
 
+class ResultatSimulation {
+	- LocalDateTime dateHeure
+	- int nombreRelevesGeneres
+	- int nombreAlertesGenerees
+}
+
 abstract class Animal {
 	- int id
 	- EspeceAnimale espece
@@ -168,6 +174,7 @@ SmartFarmingSystem "1" o-- "*" Zone
 SmartFarmingSystem "1" o-- "*" Releve
 SmartFarmingSystem "1" o-- "*" Alerte
 SmartFarmingSystem "1" o-- "*" RapportProduction
+SmartFarmingSystem ..> ResultatSimulation
 
 ZoneCulture "1" o-- "*" Culture
 ZoneElevage "1" o-- "*" Animal

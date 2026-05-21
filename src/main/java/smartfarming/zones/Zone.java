@@ -48,6 +48,18 @@ public abstract class Zone {
     public void setNom(String nom)          { this.nom = nom; }
     public void setStatus(StatutZone status) { this.status = status; }
     public void ajouterCapteur(Capteur capteur) {
+        if (capteur == null) {
+            throw new IllegalArgumentException("Le capteur est obligatoire.");
+        }
+        if (capteur.getId() == null || capteur.getId().isBlank()) {
+            throw new IllegalArgumentException("Le code du capteur est obligatoire.");
+        }
+        boolean codeExiste = capteurs.stream()
+                .anyMatch(capteurExistant -> capteur.getId().equals(capteurExistant.getId()));
+        if (codeExiste) {
+            throw new IllegalArgumentException("Un capteur avec le code " + capteur.getId()
+                    + " existe deja dans la zone " + nom + ".");
+        }
         capteur.setZone(this);
         capteurs.add(capteur);
     }
