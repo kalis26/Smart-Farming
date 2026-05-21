@@ -11,14 +11,14 @@ The project is organized around domain objects rather than a central class doing
 - `smartfarming.mesures`: numeric and GPS readings.
 - `smartfarming.alertes`: alerts generated from readings.
 - `smartfarming.entites`: cultures, animals, feeding programs, basins, and health events.
-- `smartfarming.system`: application coordinator (`SmartFarmingSystem`) for histories, alerts, and reports.
-- `smartfarming.Main`: deterministic console demo.
+- `smartfarming.system`: application coordinator (`SmartFarmingSystem`) for registered zones, readings, alerts, and reports.
+- `smartfarming.Main`: interactive console application with runtime creation menus and periodic simulation control.
 
 The main flow is:
 
 1) Create zones with geographic boundaries.
-2) Assign cultures, animals, basins, and sensors through the concerned zone.
-3) Ask sensors to periodically send readings to the application.
+2) Assign cultures, animals, basins, and sensors directly through the concerned zone, not through `SmartFarmingSystem`.
+3) Start the periodic simulation or trigger manual cycles so sensors send readings to the application.
 4) Let the system store readings and generate alerts automatically.
 5) Generate production reports.
 
@@ -29,6 +29,7 @@ The main flow is:
 Common `Zone` responsibilities:
 
 - Owns its sensors, readings, and alerts.
+- Rejects sensors with an empty code or with a code already used in the same zone.
 - Stores a rectangular geographic boundary: `latitudeMin`, `latitudeMax`, `longitudeMin`, `longitudeMax`.
 - Provides `contientPosition(PositionGPS)` for GPS boundary checks.
 - Suspends only active sensors and remembers which sensors were suspended by the zone.
@@ -89,16 +90,23 @@ Each numeric sensor keeps its own reading history and can send a reading through
 
 ## 5) Readings and alerts
 
-`SmartFarmingSystem` is the application coordinator. It does not own cultures, animals, or sensors.
+`SmartFarmingSystem` is the application coordinator. It does not own cultures, animals, basins, or sensors, and it does not expose methods such as `ajouterCulture`, `ajouterAnimal`, or `ajouterCapteur`.
 
 Key responsibilities:
 
-- `ajouterZone(Zone zone)`: registers a zone.
+- `ajouterZone(Zone zone)`: registers a zone and rejects duplicate zone codes.
 - `recevoirReleve(Releve releve)`: central entry point for readings sent by sensors.
-- `simulerCycleReleves(Random random)`: asks every active sensor in every registered zone to send one reading.
+- `simulerCycleReleves(Random random)`: asks every active sensor in every registered zone to send one reading and returns a `ResultatSimulation`.
 - `enregistrerReleveNumerique(...)` and `enregistrerReleveGPS(...)`: convenience methods that route through `recevoirReleve`.
 - `alertesActives()` and `alertesFiltrees(...)`: alert consultation.
 - `genererRapportProduction(...)`: production summary.
+
+Entity and sensor assignment belongs to the domain classes:
+
+- `ZoneCulture.ajouterCulture(...)`
+- `ZoneElevage.ajouterAnimal(...)`
+- `ZoneAquacole.ajouterBassin(...)`
+- `Zone.ajouterCapteur(...)`
 
 Automatic alert rules:
 
@@ -111,20 +119,20 @@ Every generated alert is linked to the reading that triggered it.
 
 ## 6) Main demo
 
-`Main` demonstrates:
+`Main` is an interactive console menu. It supports:
 
-- zone-owned assignment of cultures, animals, basins, and sensors
-- ruminant-zone validation rejecting poultry
-- feeding programs for livestock and aquaculture
-- structured health events for illness and weight changes
-- one deterministic periodic reading cycle with `Random(2026)`
-- automatic warning and critical alerts
-- GPS boundary alert
-- defaillant sensor maintenance with `reparer()`
-- production reports including feeding programs
+- starting and stopping a background periodic simulation every 10 seconds
+- triggering one manual reading cycle
+- adding zones, cultures, animals, basins, and compatible sensors at runtime
+- showing zone summaries, latest readings, active alerts, and production reports
+- demonstrating duplicate-code validation, livestock validation, and maintenance behavior
+
+Periodic simulation uses a single-threaded scheduler. Each cycle prints a compact summary:
+
+`Cycle #n | Releves: +x | Alertes: +y | Total alertes actives: z`
 
 ## 7) Notes
 
 - The project remains a plain Java console project with no external dependency.
-- Real timers/threads are intentionally avoided; deterministic cycles are easier to present and test.
+- Periodic readings use a simple background scheduler in `Main`; no external library is required.
 - Some older generic sensor classes may remain for compatibility, but the demo and UML use the semantic taxonomy expected by the assignment.
